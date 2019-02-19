@@ -2,7 +2,7 @@
 
 
 // if query from prisma is Same as query here.. you can do this => 
-// const { forwardTo } = require('prisma-binding');
+const { forwardTo } = require('prisma-binding');
 // const Query = {
 //     items: forwardTo('db')
 // }
@@ -12,7 +12,8 @@ const Query = {
         const items = await ctx.db.query.items();
 
         return items;
-    }
+    },
+    item: forwardTo('db'),
 };
 
 module.exports = Query;

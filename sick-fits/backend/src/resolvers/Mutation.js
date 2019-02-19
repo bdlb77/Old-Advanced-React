@@ -13,10 +13,24 @@ const Mutations = {
 
     return item;
   },
-  // createDog(parent, args, ctx, info){
-    //     // where we create a dog
-    //     console.log(args);
-    // },
+  updateItem(parent, args, ctx, info){
+    const updates = { ...args }; // take copy of all data in updates
+    delete updates.id
+    // remove the id from the updates as to NOT update the id
+    // RUN UPDATE METHOD
+    // ctx -> context in request
+    // db -> expose Prisma DB, mutation.. 
+   return ctx.db.mutation.updateItem({
+      data: updates,
+      where: { 
+        id: args.id
+      },
+       info  
+       /* updateItem is expecting us to return an item so 'info' is 
+       reference to query that contains that item */
+   })
+  } 
     
 };
 module.exports = Mutations;
+

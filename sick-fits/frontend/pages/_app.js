@@ -14,7 +14,6 @@ class MyApp extends App {
     if(Component.getInitialProps){
       // receive ctx from component and set that to be pageProps
       pageProps = await Component.getInitialProps(ctx);
-
     }
     // this exposes the query to the user
      pageProps.query = ctx.query;
@@ -28,7 +27,7 @@ class MyApp extends App {
       <Container>
         <ApolloProvider client={apollo}>
           <Page>
-            <Component />
+            <Component {...pageProps }/>
           </Page>
         </ApolloProvider>
       </Container>
