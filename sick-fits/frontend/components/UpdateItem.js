@@ -115,7 +115,7 @@ class UpdateItem extends Component {
 												required
 											/>
 										</label>
-										<button type="submit">Submit</button>
+										<button type="submit">Sav{loading ? 'ing' : 'e'}</button>
 									</fieldset>
 								</Form>
 							)}
