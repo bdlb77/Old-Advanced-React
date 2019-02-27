@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Items from '../components/Items';
 const Home = props => (
-  <div>
-   <Items />
-  </div>
+	<div>
+		<Items page={parseFloat(props.query.page)} />
+	</div>
 );
 export default Home;
