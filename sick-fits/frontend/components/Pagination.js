@@ -36,8 +36,7 @@ const Pagination = props => (
 						}}
 					>
 						<a className="prev" aria-disabled={page <= 1}>
-							{' '}
-							Prev{' '}
+							Prev
 						</a>
 					</Link>
 					<p>
