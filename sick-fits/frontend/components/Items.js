@@ -35,6 +35,7 @@ class Items extends Component {
 				<Pagination page={this.props.page || 1} />
 				{/* Only Child of a query component MUST be a function. */}
 				<Query
+					// fetchPolicy: 'network-only' => REdownload data from server (though takes away from speed)
 					query={ALL_ITEMS_QUERY}
 					variables={{
 						//if page 1 (1*4 - 4) = 0... if page 2 (2*4 - 4) = 4
