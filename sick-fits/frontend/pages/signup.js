@@ -1,17 +1,17 @@
-import SignupPage from '../components/SignupPage';
 import styled from 'styled-components';
+import SignupPage from '../components/SignupPage';
+import Signin from '../components/Signin';
 
 const Columns = styled.div`
 	display: grid;
-	grid-auto-columns: repeat(auto-fit, minmax(300px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 	grid-gap: 20px;
 `;
 const Signup = props => (
-	<div>
+	<Columns>
 		<SignupPage />
-		<SignupPage />
-		<SignupPage />
-	</div>
+		<Signin />
+	</Columns>
 );
 
 export default Signup;
