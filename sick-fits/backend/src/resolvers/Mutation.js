@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const { randomBytes } = require('crypto');
+const { promisify } = require('util');
 const Mutations = {
 	async createItem(parent, args, ctx, info) {
 		// TODO Check if they are logged in
@@ -98,6 +99,58 @@ const Mutations = {
 	signout(parent, args, ctx, info) {
 		ctx.response.clearCookie('token');
 		return { message: 'Goodbye!' };
+	},
+
+	async requestReset(parent, args, ctx, info) {
+		// check if real user
+		const user = await ctx.db.query.user({ where: { email: args.email } });
+		if (!user) {
+			throw new Error(`A user doesn't exist  with email ${args.email}`);
+		}
+		// 2. set reset token on that expiry
+		const randomBytesPromise = promisify(randomBytes);
+		const resetToken = (await randomBytesPromise(20)).toString('hex');
+		const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+		const response = await ctx.db.mutation.updateUser({
+			where: { email: args.email },
+			data: { resetToken, resetTokenExpiry },
+		});
+		return { message: 'Thanks!' };
+		// 3. email them reset token
+	},
+
+	async resetPassword(parent, args, ctx, info) {
+		// 1. check if passwords match
+		if (args.password !== args.confirmPassword) {
+			throw new Error('Your Passwords do not match!');
+		}
+		// 2. check if legit token ... grab 1st user where USERS
+		// 3. check if it's expired
+		const [user] = await ctx.db.query.users({
+			where: {
+				resetToken: args.resetToken,
+				resetTokenExpiry_gte: Date.now() - 3600000,
+			},
+		});
+		if (!user) {
+			throw new Error('Invalid / Expired Reset Token!');
+		}
+		// 4. hash new password
+		const password = await bcrypt.hash(args.password, 10);
+		// 5. save new password to user + remove old reset token fields
+		const updatedUser = await ctx.db.mutation.updateUser({
+			where: { email: user.email },
+			data: { password, resetToken: null, resetTokenExpiry: null },
+		});
+		// 6. generate jwt
+		const token = jwt.sign({ userId: updatedUser.id }, process.env.APP_SECRET);
+		// 7. set jwt cookie
+		ctx.response.cookie('token', token, {
+			httpOnly: true,
+			maxAge: 1000 * 60 * 60 * 24 * 365, // cookie for 1 year
+		});
+		// 8. return new user
+		return updatedUser;
 	},
 };
 
