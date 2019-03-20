@@ -6,7 +6,7 @@ import { CURRENT_USER_QUERY } from './User';
 const SIGN_OUT_MUTATION = gql`
 	mutation SIGN_OUT_MUTATION {
 		signout {
-			SuccessMessage
+			message
 		}
 	}
 `;
