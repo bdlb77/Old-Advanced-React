@@ -6,12 +6,21 @@ const { transport, makeANiceEmail } = require('../mail');
 const Mutations = {
 	async createItem(parent, args, ctx, info) {
 		// TODO Check if they are logged in
+		if (!ctx.request.userId) {
+			throw new Error('You Must be logged in to do that!');
+		}
 		// ctx is established in the createServer..
 		// ctx is a promise.. so async/await for it to be resolved
 		// info has the actual query.. so stx.database.mutation needs to be passed to back-end
 		const item = await ctx.db.mutation.createItem(
 			{
 				data: {
+					// this is how we create a relationship for item <=> user
+					user: {
+						connect: {
+							id: ctx.request.userId,
+						},
+					},
 					...args,
 				},
 			},
