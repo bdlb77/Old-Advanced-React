@@ -21,6 +21,15 @@ server.express.use((req, res, next) => {
 	next();
 });
 
+// Apply User onto each request
+server.express.use(async (req, res, next) => {
+	// if they aren't logged in, skip this
+	if (!req.userId) return next();
+	const user = await db.query.user({ where: { id: req.userId } }, '{ id, name, email, permissions}');
+	req.user = user;
+	next();
+});
+
 // startup server
 server.start(
 	{
