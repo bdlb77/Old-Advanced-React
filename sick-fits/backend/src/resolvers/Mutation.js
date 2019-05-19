@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
+const { hasPermission } = require('../utils');
 const Mutations = {
 	async createItem(parent, args, ctx, info) {
 		// TODO Check if they are logged in
@@ -50,8 +51,16 @@ const Mutations = {
 		const where = { id: args.id };
 		// find item -> since this is an additional query => pure graphql instead of 'info'
 		// we need to modify slightly the result of item..
-		const item = await ctx.db.query.item({ where }, `{id title}`);
+		const item = await ctx.db.query.item({ where }, `{id title user{ id }}`);
 		// if they own item / permissions (TODO)
+		const ownsItem = item.user.id === ctx.request.userId;
+		const hasPermissions = ctx.request.user.permissions.some(permission => {
+			['ADMIN', 'ITEMDELETE'].includes(permission);
+		});
+
+		if (!ownsItem && !hasPermissions) {
+			throw new Error("YOU DON'T HAVE THE PERMISSION FOR THAT!");
+		}
 		// delete it
 		return ctx.db.mutation.deleteItem({ where }, info);
 	},
@@ -174,6 +183,33 @@ const Mutations = {
 		});
 		// 8. return new user
 		return updatedUser;
+	},
+
+	async updatePermissions(parent, args, ctx, info) {
+		// 1. Check if they're logged in
+		if (!ctx.request.userId) throw new Error('Must be logged in!');
+		// 2. Query current user
+
+		const currentUser = await ctx.db.query.user({ where: { id: ctx.request.userId } }, info);
+		// 3. check if they have any permissions to do this!
+		hasPermission(currentUser, ['ADMIN', 'PERMISSIONUPDATE']);
+		// 4. update permissions
+		// pass WHATdata that needs to be updated -> where (WHERE data needs to be update)
+		// set NEEDS to b eused since Permissions is a custom defined datatype
+		return ctx.db.mutation.updateUser(
+			{
+				data: {
+					permissions: {
+						set: args.permissions,
+					},
+				},
+				// args of the userId that is from the updated user which MAY NOT be current user.
+				where: {
+					id: args.userId,
+				},
+			},
+			info
+		);
 	},
 };
 
