@@ -32,9 +32,10 @@ type Item {
   createdAt: DateTime! @createdAt
 }
 
+
 type CartItem {
   id: ID! @id @unique
   quantity: Int! @default(value: 1)
-  user: User!
-  item: Item
+  item: Item # relationship to Item
+  user: User! # relationship to User
 }

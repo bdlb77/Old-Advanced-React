@@ -1,5 +1,5 @@
 # source: https://eu1.prisma.sh/bryan-leighton-1b5948/siiiick-fits/dev
-# timestamp: Tue May 21 2019 18:08:46 GMT+0300 (Israel Daylight Time)
+# timestamp: Mon May 27 2019 12:15:49 GMT+0300 (Israel Daylight Time)
 
 type AggregateCartItem {
   count: Int!
@@ -21,8 +21,8 @@ type BatchPayload {
 type CartItem implements Node {
   id: ID!
   quantity: Int!
-  user: User!
   item: Item
+  user: User!
 }
 
 """A connection to a list of items."""
@@ -38,8 +38,8 @@ type CartItemConnection {
 input CartItemCreateInput {
   id: ID
   quantity: Int
-  user: UserCreateOneWithoutCartInput!
   item: ItemCreateOneInput
+  user: UserCreateOneWithoutCartInput!
 }
 
 input CartItemCreateManyWithoutUserInput {
@@ -188,8 +188,8 @@ input CartItemSubscriptionWhereInput {
 
 input CartItemUpdateInput {
   quantity: Int
-  user: UserUpdateOneRequiredWithoutCartInput
   item: ItemUpdateOneInput
+  user: UserUpdateOneRequiredWithoutCartInput
 }
 
 input CartItemUpdateManyDataInput {
@@ -304,8 +304,8 @@ input CartItemWhereInput {
 
   """All values greater than or equal the given value."""
   quantity_gte: Int
-  user: UserWhereInput
   item: ItemWhereInput
+  user: UserWhereInput
 }
 
 input CartItemWhereUniqueInput {
