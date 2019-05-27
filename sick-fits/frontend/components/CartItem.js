@@ -19,13 +19,13 @@ const CartItemStyles = styled.li`
 `;
 
 const CartItem = ({ cartItem }) => {
-	// if (!cartItem.item)
-	// 	return (
-	// 		<CartItemStyles>
-	// 			<p>This item does not exist.</p>
-	// 			<RemoveFromCart id={cartItem.id} />
-	// 		</CartItemStyles>
-	// 	);
+	if (!cartItem.item)
+		return (
+			<CartItemStyles>
+				<p>This item does not exist.</p>
+				<RemoveFromCart id={cartItem.id} />
+			</CartItemStyles>
+		);
 	return (
 		<CartItemStyles>
 			<img width="100" src={cartItem.item.image} alt={cartItem.item.title} />
