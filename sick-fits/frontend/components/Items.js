@@ -47,7 +47,6 @@ class Items extends Component {
 						// check error and loading state first!!!
 						if (data.error) return <p>{error.message} occurred..</p>;
 						if (data.loading) return <p>Loading</p>;
-						console.log(data.items);
 						return (
 							<ItemsList>
 								{data.items.map(item => (
