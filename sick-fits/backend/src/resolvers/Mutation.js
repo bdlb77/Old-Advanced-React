@@ -4,6 +4,7 @@ const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
 const { hasPermission } = require('../utils');
+const stripe = require('../stripe');
 const Mutations = {
 	async createItem(parent, args, ctx, info) {
 		// TODO Check if they are logged in
@@ -263,6 +264,65 @@ const Mutations = {
 		if (cartItem.user.id !== ctx.request.userId) throw new Error('Your Are Not the Owner!');
 		// 3. delete that cart Item
 		return ctx.db.mutation.deleteCartItem({ where: { id: args.id } }, info);
+	},
+	async createOrder(parent, args, ctx, info) {
+		// 1. Query user and make sure logged in
+		const { userId } = ctx.request;
+		if (!userId) throw new Error('You must be logged in to create a transaction');
+		const user = await ctx.db.query.user(
+			{ where: { id: userId } },
+			`{ 
+				id
+				name
+				email
+				cart {
+					id
+					quantity
+					item { title price id description image largeImage }
+				}
+			}`
+		);
+		// 2. recalc total of price! (people sometimes just change value in JS)
+		const amount = user.cart.reduce((tally, cartItem) => tally + cartItem.item.price * cartItem.quantity, 0);
+		// 3. Create Stripe Charge
+		const charge = await stripe.charges.create({
+			amount,
+			currency: 'USD',
+			source: args.token,
+		});
+
+		// 4. create cart Items to Order Items
+		const orderItems = user.cart.map(cartItem => {
+			const orderItem = {
+				...cartItem.item,
+				quantity: cartItem.quantity,
+				user: { connect: { id: userId } },
+			};
+			delete orderItem.id;
+			return orderItem;
+		});
+
+		// 5. create order
+
+		const order = ctx.db.mutation.createOrder({
+			data: {
+				total: charge.amount,
+				charge: charge.id,
+				items: { create: orderItems },
+				user: { connect: { id: userId } },
+			},
+		});
+		// 6. CLEAR USER cart & DELETE cart items
+
+		const cartItemIds = user.cart.map(cartItem => cartItem.id);
+
+		await ctx.db.mutation.deleteManyCartItems({
+			where: {
+				id_in: cartItemIds,
+			},
+		});
+		// 7. Return order to Client
+		return order;
 	},
 };
 
