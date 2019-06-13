@@ -1,4 +1,4 @@
 
 #  React & GraphQL
 
-React and GraphQL Proje
+React and GraphQL Project
